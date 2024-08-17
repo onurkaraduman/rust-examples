@@ -8,48 +8,45 @@ struct TodoItem {
 
 struct TodoList {
     name: String,
-    items: HashMap<i64, TodoItem>,
+    items: Vec<TodoItem>,
 }
 
 impl TodoList {
     fn new(name: String) -> TodoList {
         TodoList {
             name: name,
-            items: HashMap::new(),
+            items: Vec::new(),
         }
     }
 
     fn add(&mut self, item_name: String) {
-        let next_id = self.items.len() as i64 + 1;
+        let next_id = self.items.len() as i64;
         let todo_item = TodoItem {
             id: next_id,
             name: item_name.clone(),
             completed: false,
         };
-        self.items.insert(next_id, todo_item);
+        self.items.push(todo_item);
         println!("Added new Item: {}: {}", next_id, item_name);
     }
 
     fn update(&mut self, id: i64, new_name: String) {
-        if let Some(item) = self.items.get_mut(&id) {
+        if let Some(item) = self.items.iter_mut().find(|it| it.id == id) {
             item.name = new_name;
-            println!("Updated an Item: {}", &id);
+            println!("Updated the item with id: {}", &id);
         } else {
             print!("{} could not be found", &id);
         }
     }
 
     fn delete(&mut self, id: i64) {
-        if let Some(item) = self.items.get_mut(&id) {
-            self.items.remove(&id);
-            println!("Deleted an Item: {}", &id);
-        } else {
-            print!("{} could not be found", &id);
-        }
+        let index = self.items.iter().position(|it| it.id == id).unwrap();
+        self.items.remove(index);
+        println!("Deleted an Item: {}", &id);
     }
 
     fn complete(&mut self, id: i64) {
-        if let Some(item) = self.items.get_mut(&id) {
+        if let Some(item) = self.items.iter_mut().find(|it| it.id == id) {
             item.completed = true;
             println!("Completed an Item: {}", &id);
         } else {
@@ -59,7 +56,7 @@ impl TodoList {
 
     fn list(&self) {
         println!("----- List of {} ----", self.name);
-        for (id, item) in &self.items {
+        for item in &self.items {
             let status = if item.completed { "[X]" } else { "[ ]" };
             println!("{} {}", status, item.name);
         }
@@ -75,5 +72,12 @@ fn main() {
     todo_list.add(String::from("Lunch Break")); // id:3
     todo_list.list();
 
-    todo_list
+    todo_list.delete(1); // delete Requirement Meeting with Business
+    todo_list.list();
+
+    todo_list.update(2, String::from("Interview"));
+    todo_list.list();
+
+    todo_list.complete(0);
+    todo_list.list();
 }
