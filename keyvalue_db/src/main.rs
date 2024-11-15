@@ -7,12 +7,12 @@ struct Database {
     data: HashMap<String, String>,
 }
 
-trait Persistence {
+trait SerializableStore {
     fn save(&self, file_name: &str);
     fn load(&self, file_name: &str) -> Result<Database, String>;
 }
 
-trait DatabaseOp {
+trait KeyValueStore {
     fn set(&mut self, key: String, value: String);
     fn get(&self, key: &str) -> Option<&String>;
     fn remove(&mut self, key: &str);
@@ -27,7 +27,7 @@ impl Database {
     }
 }
 
-impl DatabaseOp for Database {
+impl KeyValueStore for Database {
     fn set(&mut self, key: String, value: String) {
         self.data.insert(key, value);
     }
@@ -45,7 +45,7 @@ impl DatabaseOp for Database {
     }
 }
 
-impl Persistence for Database {
+impl SerializableStore for Database {
     fn save(&self, file_name: &str) {
         match serde_json::to_string(&self.data) {
             Ok(json) => {
